@@ -66,9 +66,13 @@ void* send_msg_handler(void* arg)
 		{
 			break;
 		}
+		else if (strcmp(message, "") == 0)
+		{
+			continue;
+		}
 		else 
 		{
-			sprintf(buffer, "%s: %s", name, message);
+			sprintf(buffer, "%s", message);
 			send(sockfd, buffer, strlen(buffer), 0);
 		}
 		bzero(message, LENGTH);
