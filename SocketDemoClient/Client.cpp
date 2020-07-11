@@ -157,12 +157,11 @@ int main()
 	{
 		if (flag) 
 		{
-			printf("\nBye\n");
+			printf("\nBye. See you again!!!\n");
 			break;
 		}
 	}
 	closesocket(sockfd);
 
 	return EXIT_SUCCESS;
-
 }
