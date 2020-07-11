@@ -46,7 +46,7 @@ void str_trim_lf(char* arr, int length)
 	}
 }
 
-void catch_ctrl_c_and_exit(int sig) 
+void catch_ctrl_c_and_exit() 
 {
 	flag = 1;
 }
@@ -78,12 +78,11 @@ void* send_msg_handler(void* arg)
 		bzero(message, LENGTH);
 		bzero(buffer, LENGTH + 32);
 	}
-	catch_ctrl_c_and_exit(2);
-
+	catch_ctrl_c_and_exit();
 	return NULL;
 }
 
-void* recv_msg_handler(void * arg) 
+void* recv_msg_handler(void* arg) 
 {
 	char message[LENGTH] = {};
 	while (true) 
@@ -98,6 +97,12 @@ void* recv_msg_handler(void * arg)
 		{
 			break;
 		}
+		else
+		{
+			printf("\rServer off. Exits connect to...\n");
+			catch_ctrl_c_and_exit();
+			break;
+		}
 		memset(message, 0, sizeof(message));
 	}
 	return NULL;
@@ -106,7 +111,7 @@ void* recv_msg_handler(void * arg)
 int main()
 {
 	char sAdd[1000];
-	const char* ip = "0.0.0.0";
+	char ip[32];
 	unsigned int port = 8888;
 
 	WSADATA wsa;
@@ -115,23 +120,14 @@ int main()
 		printf("Failed. Error Code : %d", WSAGetLastError());
 		return 1;
 	}
-	printf("Connect to Server successfull!!!\n");
 
-	cout << "Please enter your name: ";
-	fgets(name, 32, stdin);
-	str_trim_lf(name, strlen(name));
-
-	if (strlen(name) > 32 || strlen(name) < 2) 
-	{
-		printf("Name must be less than 30 and more than 2 characters.\n");
-		return EXIT_FAILURE;
-	}
-
+	printf("Insert IP Server : ");
+	fgets(ip, 32, stdin);
+	
 	struct sockaddr_in server_addr;
-
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	server_addr.sin_addr.s_addr = inet_addr(ip);
 	server_addr.sin_port = htons(port);
 
 	int err = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
@@ -141,6 +137,20 @@ int main()
 		return EXIT_FAILURE;
 	}
 
+	printf("Connect to Server successfull!!!\n");
+	while (true)
+	{
+		cout << "Please enter your name: ";
+		fgets(name, 32, stdin);
+		str_trim_lf(name, strlen(name));
+
+		if (strlen(name) > 32 || strlen(name) < 2)
+		{
+			printf("Name must be less than 30 and more than 2 characters.\n");
+			continue;
+		}
+		break;
+	}
 	send(sockfd, name, 32, 0);
 	cout << "=== WELCOME TO THE CHATROOM ===" << endl;
 
@@ -150,23 +160,20 @@ int main()
 		printf("ERROR: pthread\n");
 		return EXIT_FAILURE;
 	}
-
 	pthread_t recv_msg_thread;
-	if (pthread_create(&recv_msg_thread, NULL, &recv_msg_handler, NULL) != 0) 
+	if (pthread_create(&recv_msg_thread, NULL, &recv_msg_handler, NULL) != 0)
 	{
 		printf("ERROR: pthread\n");
 		return EXIT_FAILURE;
 	}
-
 	while (true) 
 	{
 		if (flag) 
 		{
-			printf("\nBye. See you again!!!\n");
+			printf("\n=== Bye. See you again!!! ===\n");
 			break;
 		}
 	}
 	closesocket(sockfd);
-
 	return EXIT_SUCCESS;
 }
