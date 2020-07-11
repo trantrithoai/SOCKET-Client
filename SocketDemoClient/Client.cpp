@@ -30,7 +30,7 @@ volatile sig_atomic_t flag = 0;
 
 void str_overwrite_stdout() 
 {
-	printf("%s", "> ");
+	printf("%s", "Type message: ");
 	fflush(stdout);
 }
 
@@ -131,7 +131,8 @@ int main()
 	server_addr.sin_port = htons(port);
 
 	int err = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-	if (err == -1) {
+	if (err == -1) 
+	{
 		printf("ERROR: Not connect to Server\n");
 		return EXIT_FAILURE;
 	}
